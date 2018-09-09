@@ -16,6 +16,33 @@ fun main(args: Array<String>) {
             |    
             |    
             """.trimMargin("|"))
+        pattern("""
+            |    
+            |    
+            |       Th
+            |       H    
+            |    
+            |    
+            |    
+            """.trimMargin("|"))
+        pattern("""
+            |    
+            |       h
+            |       T
+            |       H    
+            |    
+            |    
+            |    
+            """.trimMargin("|"))
+        pattern("""
+            |    
+            |       
+            |      ...
+            |       H    
+            |    
+            |    
+            |    
+            """.trimMargin("|"))
     }
 
     val sneks = listOf(
@@ -24,28 +51,35 @@ fun main(args: Array<String>) {
             Snek(2, "Third", brain1),
             Snek(3, "Forth", brain1)
     )
-    val arena = Arena(28, 28)
-    val positions = sneks.mapIndexed { index, snek -> arena.appendStartPosition(snek, index, sneks.size) }
-    //arena.print()
+    repeat(100) {
+        val arena = Arena(28, 28)
+        val positions = sneks.mapIndexed { index, snek -> arena.appendStartPosition(snek, index, sneks.size) }
+        //arena.print()
 
-    val time = measureTimeMillis {
-        simulate(sneks, arena, 1000)
+        var rounds = 0
+        val time = measureNanoTime {
+            rounds = simulate(sneks, arena, 1000)
+        }
+
+        println("Played $rounds rounds in $time ns.")
     }
-
-    arena.print()
-    println("Simulated in $time ms")
-    //val result = fight(snek1, snek2)
 }
 
-fun simulate(sneks: List<Snek>, arena: Arena, rounds: Int) {
-    repeat(rounds) {
+fun simulate(sneks: List<Snek>, arena: Arena, rounds: Int): Int {
+    repeat(rounds) { round ->
+        var allStuck = true
         sneks.forEach { snek ->
-            val direction = arena.selectRandomDirection(snek)
+            val direction = arena.selectDirection(snek)
             if (direction != -1) {
                 arena.move(snek, direction)
-            }
+                allStuck = false
+            } 
+        }
+        if (allStuck) {
+            return round    
         }
     }
+    return rounds
 }
 
 fun Arena.appendStartPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {

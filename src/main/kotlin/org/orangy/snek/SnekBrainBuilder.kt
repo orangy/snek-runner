@@ -7,11 +7,7 @@ fun snekBrain(body: SnekBrainBuilder.() -> Unit) = SnekBrainBuilder().apply(body
 class SnekBrainBuilder {
     private val patterns = mutableListOf<SnekPattern>()
     fun build(): SnekBrain = SnekBrain(patterns)
-
-    fun pattern(body: SnekPatternBuilder.() -> Unit) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
+    
     fun pattern(text: String) {
         val patternData = text.lines().map { line ->
             line.map { cell ->
@@ -24,6 +20,7 @@ class SnekBrainBuilder {
                     'h' -> CellType.EnemyHead
                     't' -> CellType.EnemyTail
                     'b' -> CellType.EnemyBody
+                    'W' -> CellType.Wall
                     else -> throw UnsupportedOperationException("Cell type '$cell' is not recognized")
                 }
             }.toTypedArray()

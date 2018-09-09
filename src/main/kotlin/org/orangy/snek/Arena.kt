@@ -2,7 +2,7 @@ package org.orangy.snek
 
 import java.util.*
 
-private val random = Random(1)
+private val random = Random()
 
 class Arena(val width: Int, val height: Int) {
     private val cells = Array(height) { y -> Array<ArenaCell>(width) { x -> ArenaCell.Empty } }
@@ -28,7 +28,7 @@ class Arena(val width: Int, val height: Int) {
         cells[y][x] = value
     }
 
-    fun selectRandomDirection(snek: Snek): Int {
+    fun selectDirection(snek: Snek): Int {
         val position = sneks[snek]!!
         val headX = position.headX()
         val headY = position.headY()
@@ -42,11 +42,19 @@ class Arena(val width: Int, val height: Int) {
                 else -> null
             }
         }
+
+        snek.pattern.patterns.forEach { pattern ->
+            val matchingDirections = possibleDirections.filter { direction -> pattern.match(this, headX, headY, direction, snek) }
+            if (matchingDirections.isEmpty())
+                return@forEach // next pattern
+            return matchingDirections[random.nextInt(matchingDirections.size)]
+        }
+        
         if (possibleDirections.isEmpty())
             return -1
         return possibleDirections[random.nextInt(possibleDirections.size)]
     }
-
+    
     fun append(snek: Snek, position: SnekPosition) {
         this[position.headX(), position.headY()] = snek.HeadCell
         this[position.tailX(), position.tailY()] = snek.TailCell
