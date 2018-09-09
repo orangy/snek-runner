@@ -9,9 +9,10 @@ class SnekBrainBuilder {
     fun build(): SnekBrain = SnekBrain(patterns)
     
     fun pattern(text: String) {
-        val patternData = text.lines().map { line ->
-            line.map { cell ->
-                when (cell) {
+        val data = Array(7) { y -> Array(7) { x -> CellType.None } } 
+        text.lines().forEachIndexed { y, line ->
+            line.forEachIndexed { x, cell ->
+                val value = when (cell) {
                     ' ' -> CellType.None
                     '.' -> CellType.Empty
                     'H' -> CellType.OwnHead
@@ -23,8 +24,9 @@ class SnekBrainBuilder {
                     'W' -> CellType.Wall
                     else -> throw UnsupportedOperationException("Cell type '$cell' is not recognized")
                 }
-            }.toTypedArray()
-        }.toTypedArray()
-        patterns.add(SnekPattern(patternData))
+                data[y][x] = value
+            }
+        }
+        patterns.add(SnekPattern(data))
     }
 }

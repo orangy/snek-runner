@@ -2,46 +2,42 @@ package org.orangy.snek
 
 import kotlin.system.*
 
-val xdirections = intArrayOf(0, 1, 0, -1)
-val ydirections = intArrayOf(-1, 0, 1, 0)
+val xDirections = intArrayOf(0, 1, 0, -1)
+val yDirections = intArrayOf(-1, 0, 1, 0)
 
 fun main(args: Array<String>) {
     val brain1 = snekBrain {
-        pattern("""
+        pattern("""|
             |    
             |    
-            |       t
-            |       H    
-            |    
-            |    
-            |    
-            """.trimMargin("|"))
-        pattern("""
-            |    
-            |    
-            |       Th
-            |       H    
-            |    
+            |   t
+            |   H
             |    
             |    
             """.trimMargin("|"))
-        pattern("""
+        pattern("""|
             |    
-            |       h
-            |       T
-            |       H    
             |    
+            |   Th
+            |   H
             |    
             |    
             """.trimMargin("|"))
-        pattern("""
+        pattern("""|
             |    
-            |       
-            |      ...
-            |       H    
+            |   h
+            |   T
+            |   H 
             |    
             |    
+            """.trimMargin("|"))
+        pattern("""|
             |    
+            |  
+            | ...
+            |  H    
+            | 
+            | 
             """.trimMargin("|"))
     }
 
@@ -51,18 +47,29 @@ fun main(args: Array<String>) {
             Snek(2, "Third", brain1),
             Snek(3, "Forth", brain1)
     )
-    repeat(100) {
+
+    val totalGames = 10000
+    val roundsPerGame = 1000
+    val start = System.nanoTime()
+
+    val timings = (0..totalGames).map {
         val arena = Arena(28, 28)
-        val positions = sneks.mapIndexed { index, snek -> arena.appendStartPosition(snek, index, sneks.size) }
-        //arena.print()
+        sneks.mapIndexed { index, snek -> arena.appendStartPosition(snek, index, sneks.size) }
 
         var rounds = 0
         val time = measureNanoTime {
-            rounds = simulate(sneks, arena, 1000)
+            rounds = simulate(sneks, arena, roundsPerGame)
         }
 
-        println("Played $rounds rounds in $time ns.")
+        //println("Played $rounds rounds in $time ns.")
+        time / rounds
     }
+    
+    val totalTime = System.nanoTime() - start
+
+    println("Simulated $totalGames games of $roundsPerGame rounds each in ${totalTime/1000/1000/1000}sec")
+    println("Average ${timings.average().toLong()}ns per round")
+
 }
 
 fun simulate(sneks: List<Snek>, arena: Arena, rounds: Int): Int {
@@ -73,18 +80,18 @@ fun simulate(sneks: List<Snek>, arena: Arena, rounds: Int): Int {
             if (direction != -1) {
                 arena.move(snek, direction)
                 allStuck = false
-            } 
+            }
         }
         if (allStuck) {
-            return round    
+            return round
         }
     }
-    return rounds
+    return rounds - 1
 }
 
 fun Arena.appendStartPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {
-    val dx = xdirections[index]
-    val dy = ydirections[index]
+    val dx = xDirections[index]
+    val dy = yDirections[index]
     val headX = width / 2 + dx * 2
     val headY = height / 2 + dy * 2
     val length = 10

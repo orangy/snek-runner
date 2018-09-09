@@ -36,24 +36,20 @@ class SnekPattern(val data: Array<Array<CellType>>) {
         return true
     }
 
-    private fun rotateX(patternX: Int, patternY: Int, direction: Int): Int {
-        return when (direction) {
-            0 -> patternX // up
-            1 -> -patternY // right
-            2 -> -patternX // down
-            3 -> patternY // left
-            else -> throw IllegalStateException("Invalid rotation direction")
-        }    
+    private fun rotateX(patternX: Int, patternY: Int, direction: Int): Int = when (direction) {
+        0 -> patternX // up
+        1 -> -patternY // right
+        2 -> -patternX // down
+        3 -> patternY // left
+        else -> throw IllegalStateException("Invalid rotation direction")
     }
     
-    private fun rotateY(patternX: Int, patternY: Int, direction: Int): Int {
-        return when (direction) {
-            0 -> patternY // up
-            1 -> patternX // right
-            2 -> -patternY // down
-            3 -> -patternX // left
-            else -> throw IllegalStateException("Invalid rotation direction")
-        }
+    private fun rotateY(patternX: Int, patternY: Int, direction: Int): Int = when (direction) {
+        0 -> patternY // up
+        1 -> patternX // right
+        2 -> -patternY // down
+        3 -> -patternX // left
+        else -> throw IllegalStateException("Invalid rotation direction")
     }
 
     private fun findHead(data: Array<Array<CellType>>): Pair<Int, Int> {

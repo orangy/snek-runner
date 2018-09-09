@@ -30,15 +30,27 @@ class Arena(val width: Int, val height: Int) {
 
     fun selectDirection(snek: Snek): Int {
         val position = sneks[snek]!!
+        if (position.isDead()) // dead cannot dance
+            return -1
+        
         val headX = position.headX()
         val headY = position.headY()
         val possibleDirections = (0..3).mapNotNull { direction ->
-            val dx = xdirections[direction]
-            val dy = ydirections[direction]
+            val dx = xDirections[direction]
+            val dy = yDirections[direction]
             val cellValue = this[headX + dx, headY + dy]
             when (cellValue) {
                 ArenaCell.Empty -> direction
-                is ArenaCell.Tail -> direction
+                is ArenaCell.Tail -> {
+                    if (cellValue.snek == snek) { // can go to own tail?
+                        if (position.length() < 3)
+                            null // if it's of length 2, then no, cause it would flip
+                        else
+                            direction // lengthy sneks can go into onw tail
+                    } else {
+                        direction // other's tail, go!
+                    }
+                }
                 else -> null
             }
         }
@@ -63,16 +75,22 @@ class Arena(val width: Int, val height: Int) {
     }
 
     fun move(snek: Snek, direction: Int) {
-        val dx = xdirections[direction]
-        val dy = ydirections[direction]
+        val dx = xDirections[direction]
+        val dy = yDirections[direction]
         val position = sneks[snek]!!
         val target = this[position.headX() + dx, position.headY() + dy]
         if (target is ArenaCell.Tail && target.snek != snek) {
             // eat
             val targetPosition = sneks[target.snek]!!
             targetPosition.shrink()
-            this[targetPosition.tailX(), targetPosition.tailY()] = target.snek.TailCell
-
+            if (targetPosition.length() < 2) {
+                // it's dead!
+                this[targetPosition.headX(), targetPosition.headY()] = ArenaCell.Empty
+                targetPosition.die()
+            } else {
+                this[targetPosition.tailX(), targetPosition.tailY()] = target.snek.TailCell
+            }
+            
             this[position.headX(), position.headY()] = snek.BodyCell
             position.grow(dx, dy)
             this[position.headX(), position.headY()] = snek.HeadCell
