@@ -13,6 +13,4 @@ out
 *.releaseBackup
 release.properties
 
-.video
-.attach_pid*
-apidoc
+results

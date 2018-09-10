@@ -10,13 +10,16 @@ class SnekPattern(val data: Array<Array<CellType>>) {
         headY = head.second
     }
 
-    fun match(arena: Arena, x: Int, y: Int, direction: Int, self: Snek): Boolean {
+    fun match(arena: Arena, x: Int, y: Int, direction: Int, self: Snek, mirror: Boolean): Boolean {
+        var hadMatch = false
         data.forEachIndexed { patternY, patternRow ->
-            patternRow.forEachIndexed cells@ { patternX, patternCell ->
-                if (patternCell == CellType.None)
-                    return@cells // cell without a match, ignore it
-                val arenaX = x + rotateX(patternX - headX, patternY - headY, direction)
-                val arenaY = y + rotateY(patternX - headX, patternY - headY, direction)
+            val dy = patternY - headY
+            patternRow.forEachIndexed cells@{ patternX, patternCell ->
+                if (patternCell == CellType.None || patternCell == CellType.OwnHead)
+                    return@cells // cell without a match or matching own head, ignore it
+                val dx = if (mirror) headX - patternX else patternX - headX
+                val arenaX = x + rotateX(dx, dy, direction)
+                val arenaY = y + rotateY(dx, dy, direction)
                 if (arenaX < 0 || arenaY < 0 || arenaX >= arena.width || arenaY >= arena.height)
                     return false // cell out of bounds can't match
                 val arenaCell = arena[arenaX, arenaY]
@@ -31,9 +34,10 @@ class SnekPattern(val data: Array<Array<CellType>>) {
                     CellType.Wall -> if (arenaCell != ArenaCell.Wall) return false
                     else -> throw IllegalStateException("Unknown cell pattern $patternCell")
                 }
+                hadMatch = true
             }
         }
-        return true
+        return hadMatch
     }
 
     private fun rotateX(patternX: Int, patternY: Int, direction: Int): Int = when (direction) {
@@ -43,7 +47,7 @@ class SnekPattern(val data: Array<Array<CellType>>) {
         3 -> patternY // left
         else -> throw IllegalStateException("Invalid rotation direction")
     }
-    
+
     private fun rotateY(patternX: Int, patternY: Int, direction: Int): Int = when (direction) {
         0 -> patternY // up
         1 -> patternX // right
@@ -70,6 +74,11 @@ class SnekPattern(val data: Array<Array<CellType>>) {
         } else {
             return head!!
         }
+    }
+
+
+    companion object {
+        fun emptyData() = Array(7) { y -> Array(7) { x -> CellType.None } }
     }
 }
 

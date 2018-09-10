@@ -2,7 +2,7 @@ package org.orangy.snek
 
 import java.util.*
 
-private val random = Random()
+val random = Random(1)
 
 class Arena(val width: Int, val height: Int) {
     private val cells = Array(height) { y -> Array<ArenaCell>(width) { x -> ArenaCell.Empty } }
@@ -32,7 +32,7 @@ class Arena(val width: Int, val height: Int) {
         val position = sneks[snek]!!
         if (position.isDead()) // dead cannot dance
             return -1
-        
+
         val headX = position.headX()
         val headY = position.headY()
         val possibleDirections = (0..3).mapNotNull { direction ->
@@ -55,18 +55,21 @@ class Arena(val width: Int, val height: Int) {
             }
         }
 
-        snek.pattern.patterns.forEach { pattern ->
-            val matchingDirections = possibleDirections.filter { direction -> pattern.match(this, headX, headY, direction, snek) }
+        snek.brain.patterns.forEach { pattern ->
+            val matchingDirections = possibleDirections.filter { direction ->
+                pattern.match(this, headX, headY, direction, snek, false) ||
+                        pattern.match(this, headX, headY, direction, snek, true)
+            }
             if (matchingDirections.isEmpty())
                 return@forEach // next pattern
             return matchingDirections[random.nextInt(matchingDirections.size)]
         }
-        
+
         if (possibleDirections.isEmpty())
             return -1
         return possibleDirections[random.nextInt(possibleDirections.size)]
     }
-    
+
     fun append(snek: Snek, position: SnekPosition) {
         this[position.headX(), position.headY()] = snek.HeadCell
         this[position.tailX(), position.tailY()] = snek.TailCell
@@ -90,7 +93,7 @@ class Arena(val width: Int, val height: Int) {
             } else {
                 this[targetPosition.tailX(), targetPosition.tailY()] = target.snek.TailCell
             }
-            
+
             this[position.headX(), position.headY()] = snek.BodyCell
             position.grow(dx, dy)
             this[position.headX(), position.headY()] = snek.HeadCell
@@ -103,6 +106,10 @@ class Arena(val width: Int, val height: Int) {
             this[position.tailX(), position.tailY()] = snek.TailCell
         }
     }
+
+    fun status(): ArenaStatus = ArenaStatus(sneks.map {
+        SnekStatus(it.key, it.value.length(), it.value.isDead())
+    })
 }
 
 sealed class ArenaCell {
@@ -119,7 +126,7 @@ sealed class ArenaCell {
     }
 
     class Body(val snek: Snek) : ArenaCell() {
-        override fun toString() = ('A'.toInt() + snek.id).toChar().toString()
+        override fun toString() = snek.name[0].toString()
     }
 
     class Tail(val snek: Snek) : ArenaCell() {
