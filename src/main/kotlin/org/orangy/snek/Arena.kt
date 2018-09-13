@@ -5,7 +5,7 @@ import java.util.*
 val random = Random(1)
 
 class Arena(val width: Int, val height: Int) {
-    private val cells = Array(height) { y -> Array<ArenaCell>(width) { x -> ArenaCell.Empty } }
+    private val cells = Array(height) { Array<ArenaCell>(width) { ArenaCell.Empty } }
     private val sneks = mutableMapOf<Snek, SnekPosition>()
 
     init {
@@ -132,4 +132,32 @@ sealed class ArenaCell {
     class Tail(val snek: Snek) : ArenaCell() {
         override fun toString() = "○"
     }
+}
+
+fun Arena.appendSkirmishPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {
+    val dx = xDirections[index]
+    val dy = yDirections[index]
+    val headX = width / 2 + dx * 2
+    val headY = height / 2 + dy * 2
+    val length = 10
+    // We allocate arrays for maximum length to save on array reallocations
+    val xs = IntArray(length * numberOfSneks) { headX + it * dx }
+    val ys = IntArray(length * numberOfSneks) { headY + it * dy }
+    val position = SnekPosition(snek, length, xs, ys)
+    append(snek, position)
+    return position
+}
+
+fun Arena.appendDuelPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {
+    val dx = xDirections[index * 2]
+    val dy = yDirections[index * 2]
+    val headX = width / 2 + dy * 6
+    val headY = height / 2 - dy * 3
+    val length = 10
+    // We allocate arrays for maximum length to save on array reallocations
+    val xs = IntArray(length * numberOfSneks) { headX + it * dx }
+    val ys = IntArray(length * numberOfSneks) { headY + it * dy }
+    val position = SnekPosition(snek, length, xs, ys)
+    append(snek, position)
+    return position
 }

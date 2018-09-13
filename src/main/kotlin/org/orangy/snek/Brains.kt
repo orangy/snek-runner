@@ -1,6 +1,6 @@
 package org.orangy.snek
 
-val brain1 = snekBrain {
+val brain1 = snekBrain(7, 7) {
     pattern("""|
             |    
             |    
@@ -35,7 +35,7 @@ val brain1 = snekBrain {
             """.trimMargin("|"))
 }
 
-val brain2 = snekBrain {
+val brain2 = snekBrain(7, 7) {
     pattern("""|
             |    
             |    
@@ -70,7 +70,7 @@ val brain2 = snekBrain {
             """.trimMargin("|"))
 }
 
-val brain3 = snekBrain {
+val brain3 = snekBrain(7, 7) {
     pattern("""|
             |    
             |    
