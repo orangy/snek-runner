@@ -1,4 +1,4 @@
-package org.orangy.snek
+package orangy.snek
 
 val numPatterns = 9
 

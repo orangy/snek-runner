@@ -1,6 +1,6 @@
-package org.orangy.snek
+package orangy.snek
 
-class SnekPattern(val width: Int, val height: Int, private val data: Array<CellType> = defaultData(width, height)) {
+class SnekPattern(val width: Int, val height: Int, private val data: IntArray = defaultData(width, height)) {
     private var headX: Int
     private var headY: Int
 
@@ -10,8 +10,8 @@ class SnekPattern(val width: Int, val height: Int, private val data: Array<CellT
         headY = head.second
     }
 
-    operator fun get(x: Int, y: Int): CellType = data[y * width + x]
-    operator fun set(x: Int, y: Int, value: CellType) {
+    operator fun get(x: Int, y: Int): Int = data[y * width + x]
+    operator fun set(x: Int, y: Int, value: Int) {
         if (value == CellType.OwnHead) {
             data[headY * width + headX] = CellType.None
             headX = x
@@ -22,7 +22,7 @@ class SnekPattern(val width: Int, val height: Int, private val data: Array<CellT
 
     fun match(arena: Arena, x: Int, y: Int, direction: Int, self: Snek, mirror: Boolean): Boolean {
         var hadMatch = false
-        for (patternIndex in data.indices) {
+        for (patternIndex in (0 until data.lastIndex)) {
             val patternCell = data[patternIndex]
             if (patternCell == CellType.None || patternCell == CellType.OwnHead)
                 continue // cell without any match or matching own head, ignore it
@@ -120,6 +120,7 @@ class SnekPattern(val width: Int, val height: Int, private val data: Array<CellT
                 CellType.EnemyTail -> "t"
                 CellType.EnemyBody -> "b"
                 CellType.Wall -> "W"
+                else -> throw UnsupportedOperationException("Unknown CellType $cellType")
             }
             print(char)
         }
@@ -130,14 +131,24 @@ class SnekPattern(val width: Int, val height: Int, private val data: Array<CellT
     fun copy(): SnekPattern = SnekPattern(width, height, data.copyOf())
 
     companion object {
-        private fun defaultData(width: Int, height: Int): Array<CellType> {
-            val data = Array(width * height) { CellType.None }
+        private fun defaultData(width: Int, height: Int): IntArray {
+            val data = IntArray(width * height) { CellType.None }
             data[data.size / 2] = CellType.OwnHead
             return data
         }
     }
 }
 
-enum class CellType {
-    None, Empty, OwnHead, OwnTail, OwnBody, EnemyHead, EnemyTail, EnemyBody, Wall
+object CellType {
+    val None = 0
+    val Empty = 1
+    val OwnHead = 2
+    val OwnTail = 3
+    val OwnBody = 4
+    val EnemyHead = 5
+    val EnemyTail = 6
+    val EnemyBody = 7
+    val Wall = 8
+
+    fun values() = intArrayOf(None, Empty, OwnHead, OwnTail, OwnBody, EnemyHead, EnemyTail, EnemyBody, Wall)
 }

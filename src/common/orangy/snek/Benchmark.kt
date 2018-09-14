@@ -1,6 +1,4 @@
-package org.orangy.snek
-
-import kotlin.system.*
+package orangy.snek
 
 private val totalGames = 10000
 
@@ -12,7 +10,7 @@ fun main(args: Array<String>) {
             Snek("D", brain3)
     )
 
-    val start = System.nanoTime()
+    val start = nanoTime()
 
     val timings = (0..totalGames).map {
         val arena = Arena(28, 28)
@@ -25,7 +23,7 @@ fun main(args: Array<String>) {
         time to result!!
     }
 
-    val totalTime = System.nanoTime() - start
+    val totalTime = nanoTime() - start
 
     println("Simulated $totalGames games of $roundsPerGame rounds each in ${totalTime / 1000 / 1000 / 1000}sec")
     println("Average ${timings.map { it.first / it.second.rounds }.average().toLong()}ns per round")

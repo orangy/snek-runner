@@ -1,6 +1,4 @@
-package org.orangy.snek
-
-import kotlin.system.*
+package orangy.snek
 
 val brainWidth = 7
 val brainHeight = 7
@@ -10,6 +8,10 @@ val generations = 1000
 val participants = 2
 
 fun main(args: Array<String>) {
+    genetics()
+}
+
+fun genetics() {
     val original = listOf(brain1, brain2, brain3, brain4).map { Snek(randomName(), it) }
     var sneks = original
     repeat(generations) {
@@ -29,7 +31,7 @@ fun population(sneks: List<Snek>): List<Snek> {
     val candidates = buildCandidates(sneks)
     val games = candidates.size * gamesPerSnek / 4
     println("Simulating skirmish of ${candidates.size} sneks by playing $games games")
-    val start = System.nanoTime()
+    val start = nanoTime()
 
     val timings = (0..games).map {
         val arenaSneks = mutableListOf<Snek>()
@@ -54,7 +56,7 @@ fun population(sneks: List<Snek>): List<Snek> {
         time to result!!
     }
 
-    val totalTime = System.nanoTime() - start
+    val totalTime = nanoTime() - start
 
     println("Simulated $games games of $roundsPerGame rounds each in ${totalTime / 1000 / 1000 / 1000}sec")
     println("Average ${timings.map { it.first / it.second.rounds }.average().toLong()}ns per round")

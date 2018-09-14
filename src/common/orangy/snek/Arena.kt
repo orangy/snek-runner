@@ -1,6 +1,6 @@
-package org.orangy.snek
+package orangy.snek
 
-import java.util.*
+import kotlin.random.*
 
 val random = Random(1)
 

@@ -1,4 +1,4 @@
-package org.orangy.snek
+package orangy.snek
 
 class Snek(val name: String, val brain: SnekBrain) {
     val BodyCell: ArenaCell = ArenaCell.Body(this)

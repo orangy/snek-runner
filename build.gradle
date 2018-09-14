@@ -1,26 +1,53 @@
-plugins {
-    id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.2.70-eap-40'
-}
-
 group 'org.orangy'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        maven {
+            url 'https://dl.bintray.com/kotlin/kotlin-dev/'
+        }
+    }
+    dependencies {
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.20-dev-88'
+    }
+}
+
+apply plugin: 'kotlin-multiplatform'
 
 repositories {
-    maven {     url 'http://dl.bintray.com/kotlin/kotlin-eap' }
+    maven {     url 'http://dl.bintray.com/kotlin/kotlin-dev' }
     mavenCentral()
 }
 
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-}
-
-compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
-}
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+kotlin {
+    targets {
+        fromPreset(presets.jvm, 'jvm') 
+        fromPreset(presets.macosX64, 'macos') {
+            compilations.main {
+                outputKinds = [EXECUTABLE]
+            }
+        }
+    }
+    sourceSets {
+        commonMain {
+            kotlin.srcDirs += "src/common"
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+            }
+        }
+        commonTest {
+            kotlin.srcDirs += "test/common"
+            dependencies {
+                implementation "junit:junit:4.12"
+            }
+        }
+        jvmMain {
+            kotlin.srcDirs += "src/jvm"
+        }
+        macosMain {
+            kotlin.srcDirs += "src/macos"
+        }
+    }
 }

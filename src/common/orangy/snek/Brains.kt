@@ -1,4 +1,4 @@
-package org.orangy.snek
+package orangy.snek
 
 val brain1 = snekBrain(7, 7) {
     pattern("""|

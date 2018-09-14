@@ -1,4 +1,4 @@
-package org.orangy.snek
+package orangy.snek
 
 fun main(args: Array<String>) {
     val sneks = listOf(
@@ -11,7 +11,6 @@ fun main(args: Array<String>) {
     arena.print()
     val result = simulate(sneks, arena, 1000) {
         arena.print()
-        readLine()
     }
     arena.print()
     println("Played ${result.rounds} rounds")

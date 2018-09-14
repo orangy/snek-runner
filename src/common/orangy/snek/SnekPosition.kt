@@ -1,4 +1,4 @@
-package org.orangy.snek
+package orangy.snek
 
 class SnekPosition(val snek: Snek, private var length: Int, private var x: IntArray, private var y: IntArray) {
     private var headIndex = 0
