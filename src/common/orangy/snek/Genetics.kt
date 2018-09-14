@@ -60,7 +60,7 @@ fun population(sneks: List<Snek>): List<Snek> {
 
     println("Simulated $games games of $roundsPerGame rounds each in ${totalTime / 1000 / 1000 / 1000}sec")
     println("Average ${timings.map { it.first / it.second.rounds }.average().toLong()}ns per round")
-    println("Average ${timings.map { it.first }.average().toLong() / 1000000}ms per game")
+    println("Average ${timings.map { it.first }.average().toLong() / 1000}us per game")
     println("Average ${timings.map { it.second.rounds }.average().toLong()} rounds per game")
 
     val sneksResults = timings.flatMap { it.second.status.sneks }.groupBy { it.snek }
