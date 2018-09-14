@@ -1,8 +1,8 @@
 package org.orangy.snek
 
 class SnekPattern(val width: Int, val height: Int, private val data: Array<CellType> = defaultData(width, height)) {
-    val headX: Int
-    val headY: Int
+    private var headX: Int
+    private var headY: Int
 
     init {
         val head = findHead()
@@ -12,21 +12,30 @@ class SnekPattern(val width: Int, val height: Int, private val data: Array<CellT
 
     operator fun get(x: Int, y: Int): CellType = data[y * width + x]
     operator fun set(x: Int, y: Int, value: CellType) {
+        if (value == CellType.OwnHead) {
+            data[headY * width + headX] = CellType.None
+            headX = x
+            headY = y
+        }
         data[y * width + x] = value
     }
 
     fun match(arena: Arena, x: Int, y: Int, direction: Int, self: Snek, mirror: Boolean): Boolean {
         var hadMatch = false
-        data.forEachIndexed cell@{ patternIndex, patternCell ->
+        for (patternIndex in data.indices) {
+            val patternCell = data[patternIndex]
             if (patternCell == CellType.None || patternCell == CellType.OwnHead)
-                return@cell // cell without a match or matching own head, ignore it
+                continue // cell without any match or matching own head, ignore it
+
             val patternX = patternIndex % width
+            val patternY = patternIndex / width
             val dx = if (mirror) headX - patternX else patternX - headX
-            val dy = patternIndex / width - headY
+            val dy = patternY - headY
             val arenaX = x + rotateX(dx, dy, direction)
             val arenaY = y + rotateY(dx, dy, direction)
             if (arenaX < 0 || arenaY < 0 || arenaX >= arena.width || arenaY >= arena.height)
                 return false // cell out of bounds can't match
+
             val arenaCell = arena[arenaX, arenaY]
             when (patternCell) {
                 CellType.Empty -> if (arenaCell != ArenaCell.Empty) return false
@@ -58,6 +67,16 @@ class SnekPattern(val width: Int, val height: Int, private val data: Array<CellT
         2 -> -patternY // down
         3 -> -patternX // left
         else -> throw IllegalStateException("Invalid rotation direction")
+    }
+
+    private fun shift_rotateX(patternX: Int, patternY: Int, direction: Int): Int {
+        val index = (5 - direction) and 3
+        return xDirections[index] * patternX + yDirections[index] * patternY
+    }
+
+    private fun shift_rotateY(patternX: Int, patternY: Int, direction: Int): Int {
+        val index = (6 - direction) and 3
+        return xDirections[index] * patternX + yDirections[index] * patternY
     }
 
     private fun findHead(): Pair<Int, Int> {
@@ -118,7 +137,6 @@ class SnekPattern(val width: Int, val height: Int, private val data: Array<CellT
         }
     }
 }
-
 
 enum class CellType {
     None, Empty, OwnHead, OwnTail, OwnBody, EnemyHead, EnemyTail, EnemyBody, Wall

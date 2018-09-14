@@ -3,7 +3,7 @@ package org.orangy.snek
 fun main(args: Array<String>) {
     val sneks = listOf(
             Snek("A", brain1),
-            Snek("D", brain3)
+            Snek("D", brain4)
     )
 
     val arena = Arena(17, 17)

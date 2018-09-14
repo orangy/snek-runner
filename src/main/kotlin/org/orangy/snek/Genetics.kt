@@ -10,7 +10,7 @@ val generations = 1000
 val participants = 2
 
 fun main(args: Array<String>) {
-    val original = listOf(snekBrain(brainWidth, brainHeight) {}).map { Snek(randomName(), it) }
+    val original = listOf(brain1, brain2, brain3, brain4).map { Snek(randomName(), it) }
     var sneks = original
     repeat(generations) {
         println("Generation #$it of $generations")
@@ -36,7 +36,7 @@ fun population(sneks: List<Snek>): List<Snek> {
         repeat(participants) {
             arenaSneks.add(candidates[random.nextInt(candidates.size)])
         }
-        
+
         val arena = when (participants) {
             in 1..2 -> Arena(17, 17).also {
                 arenaSneks.mapIndexed { index, snek -> it.appendDuelPosition(snek, index, arenaSneks.size) }
@@ -46,7 +46,7 @@ fun population(sneks: List<Snek>): List<Snek> {
             }
             else -> throw UnsupportedOperationException()
         }
-        
+
         var result: SimulationResult? = null
         val time = measureNanoTime {
             result = simulate(arenaSneks, arena, roundsPerGame, null)
