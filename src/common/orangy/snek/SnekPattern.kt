@@ -58,12 +58,19 @@ class SnekPattern(val width: Int, val height: Int, private val data: IntArray = 
                     Exact -> if (!matched) return false
                     Not -> if (matched) return false
                     Optional -> {
-                        if (optionals == null) {
-                            optionals = IntArray(values.size) { -1 }
-                            optionals[cellType] = 0
+                        if (optionals == null) optionals = optionalProto.copyOf()
+
+                        if (optionals[cellType] == -1) {
+                            // first encounter, activate option group
+                            if (matched)
+                                optionals[cellType] = 1
+                            else
+                                optionals[cellType] = 0
+                        } else {
+                            // increment if matched
+                            if (matched)
+                                optionals[cellType]++
                         }
-                        if (matched)
-                            optionals[cellType]++
                     }
                     else -> throw IllegalStateException("Unknown cell mode $cellMode")
                 }
@@ -180,7 +187,8 @@ class SnekPattern(val width: Int, val height: Int, private val data: IntArray = 
         const val Optional = 1
         const val Not = 2
 
-        val values = intArrayOf(None, Empty, OwnHead, OwnTail, OwnBody, EnemyHead, EnemyTail, EnemyBody, Wall)
+        val variants = intArrayOf(None, Empty, OwnHead, OwnTail, OwnBody, EnemyHead, EnemyTail, EnemyBody, Wall)
+        val optionalProto = IntArray(variants.size) { -1 }
         private fun defaultData(width: Int, height: Int): IntArray {
             val data = IntArray(width * height) { None }
             data[data.size / 2] = OwnHead

@@ -179,7 +179,7 @@ fun mutate(brain: SnekBrain): SnekBrain {
     val pattern = newbrain.patterns[patternIndex]
     val x = random.nextInt(pattern.width)
     val y = random.nextInt(pattern.height)
-    val type = SnekPattern.values[random.nextInt(SnekPattern.values.size)]
+    val type = SnekPattern.variants[random.nextInt(SnekPattern.variants.size)]
     if (pattern[x, y] != SnekPattern.OwnHead) { // can't override head
         val mode = when (type) {
             SnekPattern.None, SnekPattern.OwnHead -> 0

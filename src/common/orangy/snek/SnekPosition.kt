@@ -24,6 +24,7 @@ class SnekPosition(val snek: Snek, private var length: Int, private var x: IntAr
             tailIndex = x.size - 1
     }
 
+    fun grow(direction: Int) = grow(SnekDirection.dx(direction), SnekDirection.dy(direction), direction)
     fun grow(dx: Int, dy: Int, direction: Int) {
         this.direction = direction
         val headX = headX() + dx
@@ -35,6 +36,8 @@ class SnekPosition(val snek: Snek, private var length: Int, private var x: IntAr
         x[headIndex] = headX
         y[headIndex] = headY
     }
+
+    fun move(direction: Int) = move(SnekDirection.dx(direction), SnekDirection.dy(direction), direction)
 
     fun move(dx: Int, dy: Int, direction: Int) {
         this.direction = direction
