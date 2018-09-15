@@ -3,7 +3,7 @@ package orangy.snek
 val numPatterns = 9
 
 class SnekBrain(val width: Int, val height: Int, val patterns: List<SnekPattern>) {
-    
+
     fun selectDirection(arena: Arena, position: SnekPosition): Int {
         if (position.isDead()) // dead cannot dance
             return SnekDirection.None
@@ -37,23 +37,12 @@ class SnekBrain(val width: Int, val height: Int, val patterns: List<SnekPattern>
         if (possibleIndex == 0)
             return SnekDirection.None // stuck
 
-        patterns.forEachIndexed { p, pattern ->
-            //print(" P:$p [")
-            try {
-                for (index in 0 until possibleIndex) {
-                    val direction = possibleDirections[index]
-                    //print(" D$direction:")
-                    val matchNormal = pattern.match(arena, headX, headY, direction, snek, false)
-                    //print(matchNormal.toString().first())
-                    if (matchNormal)
-                        return direction
-                    val matchMirror = pattern.match(arena, headX, headY, direction, snek, true)
-                    //print(matchMirror.toString().first())
-                    if (matchMirror)
-                        return direction
-                }
-            } finally {
-                //print("] ")
+        patterns.forEach { pattern ->
+            for (index in 0 until possibleIndex) {
+                val direction = possibleDirections[index]
+                if (pattern.match(arena, headX, headY, direction, snek, false) ||
+                        pattern.match(arena, headX, headY, direction, snek, true))
+                    return direction
             }
         }
 
@@ -94,25 +83,7 @@ class SnekBrainBuilder(val width: Int, val height: Int) {
     }
 
     fun pattern(text: String) {
-        val pattern = SnekPattern(width, height)
-        text.lines().forEachIndexed { y, line ->
-            line.forEachIndexed { x, cell ->
-                val value = when (cell) {
-                    ' ' -> SnekPattern.None
-                    '.' -> SnekPattern.Empty
-                    'H' -> SnekPattern.OwnHead
-                    'T' -> SnekPattern.OwnTail
-                    'B' -> SnekPattern.OwnBody
-                    'h' -> SnekPattern.EnemyHead
-                    't' -> SnekPattern.EnemyTail
-                    'b' -> SnekPattern.EnemyBody
-                    'W' -> SnekPattern.Wall
-                    else -> throw UnsupportedOperationException("Cell type '$cell' is not recognized")
-                }
-                pattern[x, y] = value
-            }
-        }
-        patterns.add(pattern)
+        patterns.add(SnekPattern.parse(text))
     }
 }
 

@@ -194,6 +194,32 @@ class SnekPattern(val width: Int, val height: Int, private val data: IntArray = 
             data[data.size / 2] = OwnHead
             return data
         }
+
+        fun parse(text: String): SnekPattern {
+            val lines = text.lines()
+            val width = lines.map { it.length }.max() ?: throw IllegalArgumentException("Text should have at least one line")
+            val height = lines.size
+            val pattern = SnekPattern(width, height)
+            lines.forEachIndexed { y, line ->
+                line.forEachIndexed { x, cell ->
+                    val value = when (cell) {
+                        ' ' -> SnekPattern.None
+                        '.' -> SnekPattern.Empty
+                        'H' -> SnekPattern.OwnHead
+                        'T' -> SnekPattern.OwnTail
+                        'B' -> SnekPattern.OwnBody
+                        'h' -> SnekPattern.EnemyHead
+                        't' -> SnekPattern.EnemyTail
+                        'b' -> SnekPattern.EnemyBody
+                        'W' -> SnekPattern.Wall
+                        else -> throw UnsupportedOperationException("Cell type '$cell' is not recognized")
+                    }
+                    pattern[x, y] = value
+                }
+            }
+            return pattern
+        }
+
     }
 }
 

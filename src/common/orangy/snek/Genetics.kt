@@ -52,10 +52,10 @@ fun population(sneks: List<Snek>): List<Snek> {
 
         val arena = when (participants) {
             in 1..2 -> Arena(17, 17).also {
-                arenaSneks.mapIndexed { index, snek -> it.startDuelPosition(snek, index, arenaSneks.size) }
+                arenaSneks.mapIndexed { index, snek -> it.startDuelPosition(snek, index) }
             }
             in 3..4 -> Arena(28, 28).also {
-                arenaSneks.mapIndexed { index, snek -> it.startSkirmishPosition(snek, index, arenaSneks.size) }
+                arenaSneks.mapIndexed { index, snek -> it.startSkirmishPosition(snek, index) }
             }
             else -> throw UnsupportedOperationException()
         }
@@ -69,7 +69,7 @@ fun population(sneks: List<Snek>): List<Snek> {
 
     val totalTime = nanoTime() - start
 
-    val sneksResults = dumpStatistics(games, totalTime, timings, sneks)
+    val sneksResults = dumpStatistics(games, totalTime, timings)
 
     val snekAverages = sneksResults.mapValues { it.value.map { it.length }.average() }
     val notplayed = sneks.filter { it !in snekAverages }.count()
@@ -92,7 +92,7 @@ fun population(sneks: List<Snek>): List<Snek> {
     return topSneks.map { it.first }
 }
 
-fun dumpStatistics(games: Int, totalTime: Long, timings: List<Pair<Long, SimulationResult>>, sneks: List<Snek>): Map<Snek, List<SnekStatus>> {
+fun dumpStatistics(games: Int, totalTime: Long, timings: List<Pair<Long, SimulationResult>>): Map<Snek, List<SnekStatus>> {
     println("Simulated $games games of $roundsPerGame rounds each in ${totalTime / 1000 / 1000 / 1000}sec")
     println("Average ${timings.map { it.first / it.second.rounds }.average().toLong()}ns per round")
     println("Average ${timings.map { it.first }.average().toLong() / 1000}us per game")

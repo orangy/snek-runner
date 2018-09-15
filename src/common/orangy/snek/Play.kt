@@ -9,7 +9,7 @@ fun main(args: Array<String>) {
     )
 
     val arena = Arena(17, 17)
-    sneks.mapIndexed { index, snek -> arena.startDuelPosition(snek, index, sneks.size) }
+    sneks.mapIndexed { index, snek -> arena.startDuelPosition(snek, index) }
     arena.dump()
     val result = arena.simulate(1000) {
         println("Round #$it")

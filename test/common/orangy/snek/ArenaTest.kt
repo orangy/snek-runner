@@ -9,8 +9,8 @@ class ArenaTest {
         val snek1 = Snek("1", SnekBrain(7, 7, listOf()))
         val snek2 = Snek("2", SnekBrain(7, 7, listOf()))
         val arena = Arena(17, 17).also {
-            it.startDuelPosition(snek1, 0, 2)
-            it.startDuelPosition(snek2, 1, 2)
+            it.startDuelPosition(snek1, 0)
+            it.startDuelPosition(snek2, 1)
         }
         assertEquals("""
 █████████████████
@@ -38,8 +38,8 @@ class ArenaTest {
         val snek1 = Snek("1", SnekBrain(7, 7, listOf()))
         val snek2 = Snek("2", SnekBrain(7, 7, listOf()))
         val arena = Arena(17, 17)
-        val pos1 = arena.startDuelPosition(snek1, 0, 2)
-        val pos2 = arena.startDuelPosition(snek2, 1, 2)
+        val pos1 = arena.startDuelPosition(snek1, 0)
+        val pos2 = arena.startDuelPosition(snek2, 1)
 
         arena.move(pos1, SnekDirection.Right)
         arena.move(pos2, SnekDirection.Left)
@@ -73,7 +73,7 @@ class ArenaTest {
         val sneks = (0..3).map { Snek("$it", SnekBrain(7, 7, listOf())) }
         val arena = Arena(27, 27).also { arena ->
             sneks.forEachIndexed { index, snek ->
-                arena.startSkirmishPosition(snek, index, sneks.size)
+                arena.startSkirmishPosition(snek, index)
             }
         }
         assertEquals("""

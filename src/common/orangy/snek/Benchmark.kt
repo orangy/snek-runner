@@ -14,7 +14,7 @@ fun main(args: Array<String>) {
 
     val timings = (0..totalGames).map {
         val arena = Arena(28, 28)
-        sneks.mapIndexed { index, snek -> arena.startSkirmishPosition(snek, index, sneks.size) }
+        sneks.mapIndexed { index, snek -> arena.startSkirmishPosition(snek, index) }
 
         var result: SimulationResult? = null
         val time = measureNanoTime {
@@ -25,6 +25,6 @@ fun main(args: Array<String>) {
 
     val totalTime = nanoTime() - start
 
-    val sneksResults = dumpStatistics(totalGames, totalTime, timings, sneks)
+    val sneksResults = dumpStatistics(totalGames, totalTime, timings)
     sneks.forEach { it.dumpStatistics(sneks, sneksResults) }
 }

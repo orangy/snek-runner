@@ -117,30 +117,59 @@ sealed class ArenaCell {
     }
 }
 
-fun Arena.startSkirmishPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {
+fun Arena.startSkirmishPosition(snek: Snek, index: Int, maxLength: Int = 100): SnekPosition {
     val dx = SnekDirection.dx(index)
     val dy = SnekDirection.dy(index)
     val headX = width / 2 + dx * 2
     val headY = height / 2 + dy * 2
-    val length = 10
     // We allocate arrays for maximum length to save on array reallocations
-    val xs = IntArray(length * numberOfSneks) { headX + it * dx }
-    val ys = IntArray(length * numberOfSneks) { headY + it * dy }
-    val position = SnekPosition(snek, length, xs, ys, SnekDirection.opposite(index))
+    val xs = IntArray(maxLength) { headX + it * dx }
+    val ys = IntArray(maxLength) { headY + it * dy }
+    val position = SnekPosition(snek, 10, xs, ys, SnekDirection.opposite(index))
     append(snek, position)
     return position
 }
 
-fun Arena.startDuelPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {
+fun Arena.startDuelPosition(snek: Snek, index: Int, maxLength: Int = 100): SnekPosition {
     val dx = SnekDirection.dx(index * 2)
     val dy = SnekDirection.dy(index * 2)
     val headX = width / 2 + dy * 6
     val headY = height / 2 - dy * 3
-    val length = 10
     // We allocate arrays for maximum length to save on array reallocations
-    val xs = IntArray(length * numberOfSneks) { headX + it * dx }
-    val ys = IntArray(length * numberOfSneks) { headY + it * dy }
-    val position = SnekPosition(snek, length, xs, ys, SnekDirection.opposite(index * 2))
+    val xs = IntArray(maxLength) { headX + it * dx }
+    val ys = IntArray(maxLength) { headY + it * dy }
+    val position = SnekPosition(snek, 10, xs, ys, SnekDirection.opposite(index * 2))
+    append(snek, position)
+    return position
+}
+
+fun Arena.startCustomPosition(snek: Snek, x: Int, y: Int, shape: String, maxLength: Int = 100): SnekPosition {
+    val length = shape.length
+    val directions = shape.map {
+        when (it) {
+            'u' -> SnekDirection.Up
+            'r' -> SnekDirection.Right
+            'd' -> SnekDirection.Down
+            'l' -> SnekDirection.Left
+            else -> throw IllegalArgumentException("Unknown direction code `$it`")
+        }
+    }
+    val xs = IntArray(maxLength) { 0 }
+    val ys = IntArray(maxLength) { 0 }
+    var currentX = x
+    var currentY = y
+    var index = 0
+    while (index < length) {
+        xs[index] = currentX
+        ys[index] = currentY
+        currentX += SnekDirection.dx(directions[index])
+        currentY += SnekDirection.dy(directions[index])
+        index++
+    }
+
+    xs[index] = currentX
+    ys[index] = currentY
+    val position = SnekPosition(snek, length + 1, xs, ys, SnekDirection.opposite(directions[0]))
     append(snek, position)
     return position
 }
