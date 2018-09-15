@@ -44,6 +44,10 @@ class Arena(val width: Int, val height: Int) {
         cells.forEach { println(it.joinToString("")) }
     }
 
+    fun text(): String {
+        return cells.joinToString("\n") { it.joinToString("") }
+    }
+
     operator fun get(x: Int, y: Int): ArenaCell = cells[y][x]
     operator fun set(x: Int, y: Int, value: ArenaCell) {
         cells[y][x] = value
