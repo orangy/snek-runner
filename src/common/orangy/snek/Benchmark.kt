@@ -26,5 +26,5 @@ fun main(args: Array<String>) {
     val totalTime = nanoTime() - start
 
     val sneksResults = dumpStatistics(totalGames, totalTime, timings)
-    sneks.forEach { it.dumpStatistics(sneks, sneksResults) }
+    sneks.forEach { it.dumpStatistics(sneksResults) }
 }

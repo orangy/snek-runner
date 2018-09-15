@@ -27,6 +27,7 @@ fun genetics() {
             println("Generation #$it of $generations (${hours.padZero()}:${minutes.padZero()} of ${estHours.padZero()}:${estMinutes.padZero()})")
         }
         sneks = population(sneks)
+        sneks.forEach { it.age++ }
     }
 
     sneks.take(10).forEach {
@@ -72,16 +73,20 @@ fun population(sneks: List<Snek>): List<Snek> {
     val sneksResults = dumpStatistics(games, totalTime, timings)
 
     val snekAverages = sneksResults.mapValues { it.value.map { it.length }.average() }
+/*
     val notplayed = sneks.filter { it !in snekAverages }.count()
     println("Sneks didn't play: $notplayed")
+*/
+    println("Max age: ${sneks.maxBy { it.age }?.age}g")
 
     val rating = snekAverages.toList().sortedByDescending { it.second }
     val topSneks = rating.take(populationSize)
 
     println()
-    rating.take(3).forEach { it.first.dumpStatistics(sneks, sneksResults) }
+    rating.take(3).forEach { it.first.dumpStatistics(sneksResults) }
     println("~~~~~~~~")
-    rating.takeLast(3).forEach { it.first.dumpStatistics(sneks, sneksResults) }
+    rating.takeLast(3).forEach { it.first.dumpStatistics(sneksResults) }
+    println()
 
     rating.take(3).forEach {
         println(it.first.name)
@@ -90,19 +95,6 @@ fun population(sneks: List<Snek>): List<Snek> {
     }
 
     return topSneks.map { it.first }
-}
-
-fun dumpStatistics(games: Int, totalTime: Long, timings: List<Pair<Long, SimulationResult>>): Map<Snek, List<SnekStatus>> {
-    println("Simulated $games games of $roundsPerGame rounds each in ${totalTime / 1000 / 1000 / 1000}sec")
-    println("Average ${timings.map { it.first / it.second.rounds }.average().toLong()}ns per round")
-    println("Average ${timings.map { it.first }.average().toLong() / 1000}us per game")
-    println("Average ${timings.map { it.second.rounds }.average().toLong()} rounds per game")
-
-    val sneksResults: Map<Snek, List<SnekStatus>> = timings.flatMap { it.second.status.sneks }.groupBy { it.snek }
-    val sneksRounds = sneksResults.map { it.value.size }.average().toInt()
-    println("Average $sneksRounds games per snek")
-
-    return sneksResults
 }
 
 fun List<Int>.median() = sorted().let { (it[it.size / 2] + it[(it.size - 1) / 2]) / 2 }

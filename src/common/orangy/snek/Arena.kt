@@ -2,7 +2,7 @@ package orangy.snek
 
 import kotlin.random.*
 
-val random = Random(1/*nanoTime()*/)
+val random = Random(3/*nanoTime()*/)
 
 class Arena(val width: Int, val height: Int) {
     private val cells = Array(height) { Array<ArenaCell>(width) { ArenaCell.Empty } }
