@@ -25,12 +25,6 @@ fun main(args: Array<String>) {
 
     val totalTime = nanoTime() - start
 
-    println("Simulated $totalGames games of $roundsPerGame rounds each in ${totalTime / 1000 / 1000 / 1000}sec")
-    println("Average ${timings.map { it.first / it.second.rounds }.average().toLong()}ns per round")
-    println("Average ${timings.map { it.first }.average().toLong() / 1000000}ms per game")
-    println("Average ${timings.map { it.second.rounds }.average().toLong()} rounds per game")
-
-    sneks.forEach { snek ->
-        println("Average length of `${snek.name}`: ${timings.map { it.second.status.sneks.single { it.snek == snek }.length }.average().toInt()}")
-    }
+    val sneksResults = dumpStatistics(totalGames, totalTime, timings, sneks)
+    sneks.forEach { it.dumpStatistics(sneks, sneksResults) }
 }

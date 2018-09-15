@@ -31,44 +31,47 @@ class Arena(val width: Int, val height: Int) {
     fun selectDirection(snek: Snek): Int {
         val position = sneks[snek]!!
         if (position.isDead()) // dead cannot dance
-            return -1
+            return SnekDirection.None
 
         val headX = position.headX()
         val headY = position.headY()
-        val possibleDirections = (position.direction()..position.direction() + 3).mapNotNull { shiftedDirection ->
-            val direction = shiftedDirection % 4
-            val dx = xDirections[direction]
-            val dy = yDirections[direction]
-            val cellValue = this[headX + dx, headY + dy]
-            when (cellValue) {
-                ArenaCell.Empty -> direction
+        var currentDirection = position.direction()
+        val possibleDirections = intArrayOf(-1, -1, -1, -1)
+        var possibleIndex = 0
+        repeat(4) {
+            val dx = SnekDirection.dx(currentDirection)
+            val dy = SnekDirection.dy(currentDirection)
+            val cellInDirection = this[headX + dx, headY + dy]
+            when (cellInDirection) {
+                ArenaCell.Empty -> possibleDirections[possibleIndex++] = currentDirection
                 is ArenaCell.Tail -> {
-                    if (cellValue.snek == snek) { // can go to own tail?
-                        if (position.length() < 3)
-                            null // if it's of length 2, then no, cause it would flip
-                        else
-                            direction // lengthy sneks can go into onw tail
+                    if (cellInDirection.snek == snek) {
+                        // lengthy sneks can go into own tail
+                        // but if it's of length 2, then no, cause it would flip
+                        if (position.length() > 2)
+                            possibleDirections[possibleIndex++] = currentDirection
                     } else {
-                        direction // other's tail, go!
+                        possibleDirections[possibleIndex++] = currentDirection // other's tail, go!
                     }
                 }
-                else -> null
             }
+            currentDirection = SnekDirection.clockwise(currentDirection)
         }
+
+        if (possibleIndex == 0)
+            return SnekDirection.None // stuck
 
         snek.brain.patterns.forEach { pattern ->
-            val matchingDirections = possibleDirections.filter { direction ->
-                pattern.match(this, headX, headY, direction, snek, false) ||
+            for (index in 0 until possibleIndex) {
+                val direction = possibleDirections[index]
+                val match = pattern.match(this, headX, headY, direction, snek, false) ||
                         pattern.match(this, headX, headY, direction, snek, true)
+                if (match)
+                    return direction
             }
-            if (matchingDirections.isEmpty())
-                return@forEach // next pattern
-            return matchingDirections[random.nextInt(matchingDirections.size)]
         }
 
-        if (possibleDirections.isEmpty())
-            return -1
-        return possibleDirections[random.nextInt(possibleDirections.size)]
+        return possibleDirections[random.nextInt(possibleIndex)]
     }
 
     fun append(snek: Snek, position: SnekPosition) {
@@ -79,8 +82,8 @@ class Arena(val width: Int, val height: Int) {
     }
 
     fun move(snek: Snek, direction: Int) {
-        val dx = xDirections[direction]
-        val dy = yDirections[direction]
+        val dx = SnekDirection.dx(direction)
+        val dy = SnekDirection.dy(direction)
         val position = sneks[snek]!!
         val target = this[position.headX() + dx, position.headY() + dy]
         if (target is ArenaCell.Tail && target.snek != snek) {
@@ -136,29 +139,29 @@ sealed class ArenaCell {
 }
 
 fun Arena.startSkirmishPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {
-    val dx = xDirections[index]
-    val dy = yDirections[index]
+    val dx = SnekDirection.dx(index)
+    val dy = SnekDirection.dy(index)
     val headX = width / 2 + dx * 2
     val headY = height / 2 + dy * 2
     val length = 10
     // We allocate arrays for maximum length to save on array reallocations
     val xs = IntArray(length * numberOfSneks) { headX + it * dx }
     val ys = IntArray(length * numberOfSneks) { headY + it * dy }
-    val position = SnekPosition(snek, length, xs, ys, (index + 2) % 4)
+    val position = SnekPosition(snek, length, xs, ys, SnekDirection.opposite(index))
     append(snek, position)
     return position
 }
 
 fun Arena.startDuelPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {
-    val dx = xDirections[index * 2]
-    val dy = yDirections[index * 2]
+    val dx = SnekDirection.dx(index * 2)
+    val dy = SnekDirection.dy(index * 2)
     val headX = width / 2 + dy * 6
     val headY = height / 2 - dy * 3
     val length = 10
     // We allocate arrays for maximum length to save on array reallocations
     val xs = IntArray(length * numberOfSneks) { headX + it * dx }
     val ys = IntArray(length * numberOfSneks) { headY + it * dy }
-    val position = SnekPosition(snek, length, xs, ys, (1 - index) * 2)
+    val position = SnekPosition(snek, length, xs, ys, SnekDirection.opposite(index * 2))
     append(snek, position)
     return position
 }

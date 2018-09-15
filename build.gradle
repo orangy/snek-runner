@@ -24,30 +24,45 @@ repositories {
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm') 
+/*
         fromPreset(presets.macosX64, 'macos') {
             compilations.main {
                 outputKinds = [EXECUTABLE]
             }
         }
+*/
     }
     sourceSets {
         commonMain {
             kotlin.srcDirs += "src/common"
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+                implementation 'org.jetbrains.kotlin:kotlin-stdlib'
             }
         }
         commonTest {
             kotlin.srcDirs += "test/common"
             dependencies {
-                implementation "junit:junit:4.12"
+                implementation 'org.jetbrains.kotlin:kotlin-test-common'
+                implementation 'org.jetbrains.kotlin:kotlin-test-annotations-common'
             }
         }
+        
         jvmMain {
             kotlin.srcDirs += "src/jvm"
         }
-        macosMain {
+        jvmTest {
+            kotlin.srcDirs += "test/jvm"
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-test'
+                implementation 'org.jetbrains.kotlin:kotlin-test-junit'
+            }
+        }
+        
+/*        macosMain {
             kotlin.srcDirs += "src/macos"
         }
+        macosTest {
+            kotlin.srcDirs += "test/macos"
+        }*/
     }
 }

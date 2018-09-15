@@ -21,7 +21,7 @@ fun genetics() {
             val elapsedSeconds = (nanoTime() - start) / 1000 / 1000 / 1000
             val hours = elapsedSeconds / 3600
             val minutes = (elapsedSeconds % 3600) / 60
-            val estimate = (elapsedSeconds.toDouble() * generations / it).toLong() 
+            val estimate = (elapsedSeconds.toDouble() * generations / it).toLong()
             val estHours = estimate / 3600
             val estMinutes = (estimate % 3600) / 60
             println("Generation #$it of $generations (${hours.padZero()}:${minutes.padZero()} of ${estHours.padZero()}:${estMinutes.padZero()})")
@@ -41,6 +41,7 @@ fun population(sneks: List<Snek>): List<Snek> {
     val candidates = buildCandidates(sneks)
     val games = candidates.size * gamesPerSnek / participants
     println("Simulating skirmish of ${candidates.size} sneks by playing $games games")
+
     val start = nanoTime()
 
     val timings = (0..games).map {
@@ -68,41 +69,19 @@ fun population(sneks: List<Snek>): List<Snek> {
 
     val totalTime = nanoTime() - start
 
-    println("Simulated $games games of $roundsPerGame rounds each in ${totalTime / 1000 / 1000 / 1000}sec")
-    println("Average ${timings.map { it.first / it.second.rounds }.average().toLong()}ns per round")
-    println("Average ${timings.map { it.first }.average().toLong() / 1000}us per game")
-    println("Average ${timings.map { it.second.rounds }.average().toLong()} rounds per game")
-
-    val sneksResults = timings.flatMap { it.second.status.sneks }.groupBy { it.snek }
-    val sneksRounds = sneksResults.map { it.value.size }.average().toInt()
-    println("Average $sneksRounds games per snek")
+    val sneksResults = dumpStatistics(games, totalTime, timings, sneks)
 
     val snekAverages = sneksResults.mapValues { it.value.map { it.length }.average() }
-    val snekMedians = sneksResults.mapValues { it.value.map { it.length }.median() }
     val notplayed = sneks.filter { it !in snekAverages }.count()
     println("Sneks didn't play: $notplayed")
 
     val rating = snekAverages.toList().sortedByDescending { it.second }
     val topSneks = rating.take(populationSize)
 
-    val survived = topSneks.count { it.first in sneks }
-    println("Sneks survived: $survived of ${sneks.size}")
-
-    val dumpSnek: (Pair<Snek, Double>) -> Unit = { (snek, length) ->
-        if (snek in sneks)
-            print("* ")
-        else
-            print("  ")
-        val minLength = sneksResults[snek]!!.minBy { it.length }!!.length
-        val maxLength = sneksResults[snek]!!.maxBy { it.length }!!.length
-        val median = snekMedians[snek]!!
-        println("${snek.name}: ${length.toInt()} [$minLength..$maxLength] ~$median")
-    }
-
     println()
-    rating.take(3).forEach(dumpSnek)
+    rating.take(3).forEach { it.first.dumpStatistics(sneks, sneksResults) }
     println("~~~~~~~~")
-    rating.takeLast(3).forEach(dumpSnek)
+    rating.takeLast(3).forEach { it.first.dumpStatistics(sneks, sneksResults) }
 
     rating.take(3).forEach {
         println(it.first.name)
@@ -111,6 +90,19 @@ fun population(sneks: List<Snek>): List<Snek> {
     }
 
     return topSneks.map { it.first }
+}
+
+fun dumpStatistics(games: Int, totalTime: Long, timings: List<Pair<Long, SimulationResult>>, sneks: List<Snek>): Map<Snek, List<SnekStatus>> {
+    println("Simulated $games games of $roundsPerGame rounds each in ${totalTime / 1000 / 1000 / 1000}sec")
+    println("Average ${timings.map { it.first / it.second.rounds }.average().toLong()}ns per round")
+    println("Average ${timings.map { it.first }.average().toLong() / 1000}us per game")
+    println("Average ${timings.map { it.second.rounds }.average().toLong()} rounds per game")
+
+    val sneksResults: Map<Snek, List<SnekStatus>> = timings.flatMap { it.second.status.sneks }.groupBy { it.snek }
+    val sneksRounds = sneksResults.map { it.value.size }.average().toInt()
+    println("Average $sneksRounds games per snek")
+
+    return sneksResults
 }
 
 fun List<Int>.median() = sorted().let { (it[it.size / 2] + it[(it.size - 1) / 2]) / 2 }

@@ -1,5 +1,7 @@
 package orangy.snek
 
+val roundsPerGame = 1000
+
 fun main(args: Array<String>) {
     val sneks = listOf(
             Snek("A", brain1),

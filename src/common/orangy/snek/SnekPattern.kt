@@ -23,48 +23,51 @@ class SnekPattern(val width: Int, val height: Int, private val data: IntArray = 
     fun match(arena: Arena, x: Int, y: Int, direction: Int, self: Snek, mirror: Boolean): Boolean {
         var hadMatch = false
         var optionals: IntArray? = null
-        for (patternIndex in 0..data.lastIndex) {
-            val patternCell = data[patternIndex]
-            val matchCell = patternCell and 15
-            if (matchCell == None || matchCell == OwnHead)
-                continue // cell without any match or matching own head, ignore it
+        var patternIndex = 0
+        for (patternY in 0 until height) {
+            for (patternX in 0 until width) {
+                val patternCell = data[patternIndex]
+                val cellType = patternCell and 15 // get cell type
+                if (cellType == None || cellType == OwnHead)
+                    continue // cell without any match or matching own head, ignore it
 
-            val patternX = patternIndex % width
-            val dx = if (mirror) headX - patternX else patternX - headX
-            val patternY = patternIndex / width
-            val dy = patternY - headY
+                val dx = if (mirror) headX - patternX else patternX - headX
+                val dy = patternY - headY
 
-            val arenaX = x + rotateX(dx, dy, direction)
-            val arenaY = y + rotateY(dx, dy, direction)
-            if (arenaX < 0 || arenaY < 0 || arenaX >= arena.width || arenaY >= arena.height)
-                return false // cell out of bounds can't match
+                val arenaX = x + rotateX(dx, dy, direction)
+                val arenaY = y + rotateY(dx, dy, direction)
+                if (arenaX < 0 || arenaY < 0 || arenaX >= arena.width || arenaY >= arena.height)
+                    return false // cell out of bounds can't match
 
-            val arenaCell = arena[arenaX, arenaY]
-            val matched = when (matchCell) {
-                Empty -> arenaCell is ArenaCell.Empty
-                EnemyHead -> arenaCell is ArenaCell.Head && arenaCell.snek != self
-                EnemyTail -> arenaCell is ArenaCell.Tail && arenaCell.snek != self
-                EnemyBody -> arenaCell is ArenaCell.Body && arenaCell.snek != self
-                OwnTail -> arenaCell is ArenaCell.Tail && arenaCell.snek == self
-                OwnBody -> arenaCell is ArenaCell.Body && arenaCell.snek == self
-                Wall -> arenaCell is ArenaCell.Wall
-                else -> throw IllegalStateException("Unknown cell pattern $matchCell")
-            }
-            val matchMode = patternCell shr 4
-            when (matchMode) {
-                Exact -> if (!matched) return false
-                Not -> if (matched) return false
-                Optional -> {
-                    if (optionals == null) {
-                        optionals = IntArray(values.size) { -1 }
-                        optionals[matchCell] = 0
-                    }
-                    if (matched)
-                        optionals[matchCell]++
+                val arenaCell = arena[arenaX, arenaY]
+                val matched = when (cellType) {
+                    Empty -> arenaCell is ArenaCell.Empty
+                    EnemyHead -> arenaCell is ArenaCell.Head && arenaCell.snek != self
+                    EnemyTail -> arenaCell is ArenaCell.Tail && arenaCell.snek != self
+                    EnemyBody -> arenaCell is ArenaCell.Body && arenaCell.snek != self
+                    OwnTail -> arenaCell is ArenaCell.Tail && arenaCell.snek == self
+                    OwnBody -> arenaCell is ArenaCell.Body && arenaCell.snek == self
+                    Wall -> arenaCell is ArenaCell.Wall
+                    else -> throw IllegalStateException("Unknown cell pattern $cellType")
                 }
-                else -> throw IllegalStateException("Unknown cell mode $matchMode")
+
+                val cellMode = patternCell shr 4
+                when (cellMode) {
+                    Exact -> if (!matched) return false
+                    Not -> if (matched) return false
+                    Optional -> {
+                        if (optionals == null) {
+                            optionals = IntArray(values.size) { -1 }
+                            optionals[cellType] = 0
+                        }
+                        if (matched)
+                            optionals[cellType]++
+                    }
+                    else -> throw IllegalStateException("Unknown cell mode $cellMode")
+                }
+                hadMatch = true
+                patternIndex++
             }
-            hadMatch = true
         }
         if (optionals != null && optionals.any { it == 0 })
             return false // we had optional groups, but some group didn't match any item
@@ -72,29 +75,29 @@ class SnekPattern(val width: Int, val height: Int, private val data: IntArray = 
     }
 
     private fun rotateX(patternX: Int, patternY: Int, direction: Int): Int = when (direction) {
-        0 -> patternX // up
-        1 -> -patternY // right
-        2 -> -patternX // down
-        3 -> patternY // left
+        SnekDirection.Up -> patternX // up
+        SnekDirection.Right -> -patternY // right
+        SnekDirection.Down -> -patternX // down
+        SnekDirection.Left -> patternY // left
         else -> throw IllegalStateException("Invalid rotation direction $direction")
     }
 
     private fun rotateY(patternX: Int, patternY: Int, direction: Int): Int = when (direction) {
-        0 -> patternY // up
-        1 -> patternX // right
-        2 -> -patternY // down
-        3 -> -patternX // left
+        SnekDirection.Up -> patternY // up
+        SnekDirection.Right -> patternX // right
+        SnekDirection.Down -> -patternY // down
+        SnekDirection.Left -> -patternX // left
         else -> throw IllegalStateException("Invalid rotation direction $direction")
     }
 
     private fun shift_rotateX(patternX: Int, patternY: Int, direction: Int): Int {
         val index = (5 - direction) and 3
-        return xDirections[index] * patternX + yDirections[index] * patternY
+        return SnekDirection.dx(index) * patternX + SnekDirection.dy(index) * patternY
     }
 
     private fun shift_rotateY(patternX: Int, patternY: Int, direction: Int): Int {
         val index = (6 - direction) and 3
-        return xDirections[index] * patternX + yDirections[index] * patternY
+        return SnekDirection.dx(index) * patternX + SnekDirection.dy(index) * patternY
     }
 
     private fun findHead(): Pair<Int, Int> {
