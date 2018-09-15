@@ -62,7 +62,7 @@ fun population(sneks: List<Snek>): List<Snek> {
 
         var result: SimulationResult? = null
         val time = measureNanoTime {
-            result = simulate(arenaSneks, arena, roundsPerGame, null)
+            result = arena.simulate(roundsPerGame, null)
         }
         time to result!!
     }

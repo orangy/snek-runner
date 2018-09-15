@@ -2,11 +2,11 @@ package orangy.snek
 
 import kotlin.random.*
 
-val random = Random(nanoTime())
+val random = Random(1/*nanoTime()*/)
 
 class Arena(val width: Int, val height: Int) {
     private val cells = Array(height) { Array<ArenaCell>(width) { ArenaCell.Empty } }
-    private val sneks = mutableMapOf<Snek, SnekPosition>()
+    private val positions = mutableListOf<SnekPosition>()
 
     init {
         repeat(width) {
@@ -19,7 +19,28 @@ class Arena(val width: Int, val height: Int) {
         }
     }
 
-    fun print() {
+    fun simulate(rounds: Int, callback: (Arena.(Int) -> Unit)?): SimulationResult {
+        repeat(rounds) { round ->
+            var allStuck = true
+            positions.forEach { position ->
+                //print("Move: ${position.snek.name}")
+                val direction = position.snek.brain.selectDirection(this, position)
+                if (direction != -1) {
+                    move(position, direction)
+                    allStuck = false
+                }
+                //println()
+            }
+            if (allStuck) {
+                return SimulationResult(round, status())
+            }
+            if (callback != null)
+                callback(round)
+        }
+        return SimulationResult(rounds - 1, status())
+    }
+
+    fun dump() {
         cells.forEach { println(it.joinToString("")) }
     }
 
@@ -28,67 +49,21 @@ class Arena(val width: Int, val height: Int) {
         cells[y][x] = value
     }
 
-    fun selectDirection(snek: Snek): Int {
-        val position = sneks[snek]!!
-        if (position.isDead()) // dead cannot dance
-            return SnekDirection.None
-
-        val headX = position.headX()
-        val headY = position.headY()
-        var currentDirection = position.direction()
-        val possibleDirections = intArrayOf(-1, -1, -1, -1)
-        var possibleIndex = 0
-        repeat(4) {
-            val dx = SnekDirection.dx(currentDirection)
-            val dy = SnekDirection.dy(currentDirection)
-            val cellInDirection = this[headX + dx, headY + dy]
-            when (cellInDirection) {
-                ArenaCell.Empty -> possibleDirections[possibleIndex++] = currentDirection
-                is ArenaCell.Tail -> {
-                    if (cellInDirection.snek == snek) {
-                        // lengthy sneks can go into own tail
-                        // but if it's of length 2, then no, cause it would flip
-                        if (position.length() > 2)
-                            possibleDirections[possibleIndex++] = currentDirection
-                    } else {
-                        possibleDirections[possibleIndex++] = currentDirection // other's tail, go!
-                    }
-                }
-            }
-            currentDirection = SnekDirection.clockwise(currentDirection)
-        }
-
-        if (possibleIndex == 0)
-            return SnekDirection.None // stuck
-
-        snek.brain.patterns.forEach { pattern ->
-            for (index in 0 until possibleIndex) {
-                val direction = possibleDirections[index]
-                val match = pattern.match(this, headX, headY, direction, snek, false) ||
-                        pattern.match(this, headX, headY, direction, snek, true)
-                if (match)
-                    return direction
-            }
-        }
-
-        return possibleDirections[random.nextInt(possibleIndex)]
-    }
-
     fun append(snek: Snek, position: SnekPosition) {
         this[position.headX(), position.headY()] = snek.HeadCell
         this[position.tailX(), position.tailY()] = snek.TailCell
         (1..(position.length() - 2)).forEach { this[position.x(it), position.y(it)] = snek.BodyCell }
-        sneks[snek] = position
+        positions.add(position)
     }
 
-    fun move(snek: Snek, direction: Int) {
+    fun move(position: SnekPosition, direction: Int) {
         val dx = SnekDirection.dx(direction)
         val dy = SnekDirection.dy(direction)
-        val position = sneks[snek]!!
         val target = this[position.headX() + dx, position.headY() + dy]
+        val snek = position.snek
         if (target is ArenaCell.Tail && target.snek != snek) {
             // eat
-            val targetPosition = sneks[target.snek]!!
+            val targetPosition = positions.first { it.snek == target.snek }
             targetPosition.shrink()
             if (targetPosition.length() < 2) {
                 // it's dead!
@@ -111,8 +86,8 @@ class Arena(val width: Int, val height: Int) {
         }
     }
 
-    fun status(): ArenaStatus = ArenaStatus(sneks.map {
-        SnekStatus(it.key, it.value.length(), it.value.isDead())
+    fun status(): ArenaStatus = ArenaStatus(positions.map {
+        SnekStatus(it.snek, it.length(), it.isDead())
     })
 }
 

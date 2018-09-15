@@ -28,8 +28,10 @@ class SnekPattern(val width: Int, val height: Int, private val data: IntArray = 
             for (patternX in 0 until width) {
                 val patternCell = data[patternIndex]
                 val cellType = patternCell and 15 // get cell type
-                if (cellType == None || cellType == OwnHead)
+                if (cellType == None || cellType == OwnHead) {
+                    patternIndex++
                     continue // cell without any match or matching own head, ignore it
+                }
 
                 val dx = if (mirror) headX - patternX else patternX - headX
                 val dy = patternY - headY
@@ -125,6 +127,13 @@ class SnekPattern(val width: Int, val height: Int, private val data: IntArray = 
         var hash = 0
         data.forEach { hash = hash * 13 + it }
         return hash
+    }
+
+    fun dump() {
+        repeat(height) {
+            dumpRow(it)
+            println()
+        }
     }
 
     fun dumpRow(rowIndex: Int) {

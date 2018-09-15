@@ -18,7 +18,7 @@ fun main(args: Array<String>) {
 
         var result: SimulationResult? = null
         val time = measureNanoTime {
-            result = simulate(sneks, arena, roundsPerGame, null)
+            result = arena.simulate(roundsPerGame, null)
         }
         time to result!!
     }
