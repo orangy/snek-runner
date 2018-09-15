@@ -38,10 +38,11 @@ class SnekPattern(val width: Int, val height: Int, private val data: IntArray = 
 
                 val arenaX = x + rotateX(dx, dy, direction)
                 val arenaY = y + rotateY(dx, dy, direction)
-                if (arenaX < 0 || arenaY < 0 || arenaX >= arena.width || arenaY >= arena.height)
-                    return false // cell out of bounds can't match
+                val arenaCell = if (arenaX < 0 || arenaY < 0 || arenaX >= arena.width || arenaY >= arena.height)
+                    ArenaCell.Wall // cells out of bounds are walls
+                else
+                    arena[arenaX, arenaY]
 
-                val arenaCell = arena[arenaX, arenaY]
                 val matched = when (cellType) {
                     Empty -> arenaCell is ArenaCell.Empty
                     EnemyHead -> arenaCell is ArenaCell.Head && arenaCell.snek != self
@@ -197,7 +198,8 @@ class SnekPattern(val width: Int, val height: Int, private val data: IntArray = 
 
         fun parse(text: String): SnekPattern {
             val lines = text.lines()
-            val width = lines.map { it.length }.max() ?: throw IllegalArgumentException("Text should have at least one line")
+            val width = lines.map { it.length }.max()
+                    ?: throw IllegalArgumentException("Text should have at least one line")
             val height = lines.size
             val pattern = SnekPattern(width, height)
             lines.forEachIndexed { y, line ->
