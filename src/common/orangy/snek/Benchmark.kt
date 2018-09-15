@@ -14,7 +14,7 @@ fun main(args: Array<String>) {
 
     val timings = (0..totalGames).map {
         val arena = Arena(28, 28)
-        sneks.mapIndexed { index, snek -> arena.appendSkirmishPosition(snek, index, sneks.size) }
+        sneks.mapIndexed { index, snek -> arena.startSkirmishPosition(snek, index, sneks.size) }
 
         var result: SimulationResult? = null
         val time = measureNanoTime {

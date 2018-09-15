@@ -2,7 +2,7 @@ package orangy.snek
 
 import kotlin.random.*
 
-val random = Random(1)
+val random = Random(nanoTime())
 
 class Arena(val width: Int, val height: Int) {
     private val cells = Array(height) { Array<ArenaCell>(width) { ArenaCell.Empty } }
@@ -35,7 +35,8 @@ class Arena(val width: Int, val height: Int) {
 
         val headX = position.headX()
         val headY = position.headY()
-        val possibleDirections = (0..3).mapNotNull { direction ->
+        val possibleDirections = (position.direction()..position.direction() + 3).mapNotNull { shiftedDirection ->
+            val direction = shiftedDirection % 4
             val dx = xDirections[direction]
             val dy = yDirections[direction]
             val cellValue = this[headX + dx, headY + dy]
@@ -95,13 +96,13 @@ class Arena(val width: Int, val height: Int) {
             }
 
             this[position.headX(), position.headY()] = snek.BodyCell
-            position.grow(dx, dy)
+            position.grow(dx, dy, direction)
             this[position.headX(), position.headY()] = snek.HeadCell
         } else {
             // move
             this[position.headX(), position.headY()] = snek.BodyCell
             this[position.tailX(), position.tailY()] = ArenaCell.Empty
-            position.move(dx, dy)
+            position.move(dx, dy, direction)
             this[position.headX(), position.headY()] = snek.HeadCell
             this[position.tailX(), position.tailY()] = snek.TailCell
         }
@@ -134,7 +135,7 @@ sealed class ArenaCell {
     }
 }
 
-fun Arena.appendSkirmishPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {
+fun Arena.startSkirmishPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {
     val dx = xDirections[index]
     val dy = yDirections[index]
     val headX = width / 2 + dx * 2
@@ -143,12 +144,12 @@ fun Arena.appendSkirmishPosition(snek: Snek, index: Int, numberOfSneks: Int): Sn
     // We allocate arrays for maximum length to save on array reallocations
     val xs = IntArray(length * numberOfSneks) { headX + it * dx }
     val ys = IntArray(length * numberOfSneks) { headY + it * dy }
-    val position = SnekPosition(snek, length, xs, ys)
+    val position = SnekPosition(snek, length, xs, ys, (index + 2) % 4)
     append(snek, position)
     return position
 }
 
-fun Arena.appendDuelPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {
+fun Arena.startDuelPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPosition {
     val dx = xDirections[index * 2]
     val dy = yDirections[index * 2]
     val headX = width / 2 + dy * 6
@@ -157,7 +158,7 @@ fun Arena.appendDuelPosition(snek: Snek, index: Int, numberOfSneks: Int): SnekPo
     // We allocate arrays for maximum length to save on array reallocations
     val xs = IntArray(length * numberOfSneks) { headX + it * dx }
     val ys = IntArray(length * numberOfSneks) { headY + it * dy }
-    val position = SnekPosition(snek, length, xs, ys)
+    val position = SnekPosition(snek, length, xs, ys, (1 - index) * 2)
     append(snek, position)
     return position
 }

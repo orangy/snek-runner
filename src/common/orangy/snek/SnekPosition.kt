@@ -1,6 +1,6 @@
 package orangy.snek
 
-class SnekPosition(val snek: Snek, private var length: Int, private var x: IntArray, private var y: IntArray) {
+class SnekPosition(val snek: Snek, private var length: Int, private var x: IntArray, private var y: IntArray, private var direction: Int) {
     private var headIndex = 0
     private var tailIndex = length - 1
     private var dead = false
@@ -13,6 +13,7 @@ class SnekPosition(val snek: Snek, private var length: Int, private var x: IntAr
     fun tailX() = x[tailIndex]
     fun tailY() = y[tailIndex]
 
+    fun direction() = direction
     fun length() = length
     fun isDead() = dead
 
@@ -23,7 +24,8 @@ class SnekPosition(val snek: Snek, private var length: Int, private var x: IntAr
             tailIndex = x.size - 1
     }
 
-    fun grow(dx: Int, dy: Int) {
+    fun grow(dx: Int, dy: Int, direction: Int) {
+        this.direction = direction
         val headX = headX() + dx
         val headY = headY() + dy
         length++
@@ -34,7 +36,8 @@ class SnekPosition(val snek: Snek, private var length: Int, private var x: IntAr
         y[headIndex] = headY
     }
 
-    fun move(dx: Int, dy: Int) {
+    fun move(dx: Int, dy: Int, direction: Int) {
+        this.direction = direction
         val headX = headX() + dx
         val headY = headY() + dy
         headIndex = (headIndex + x.size - 1) % x.size
