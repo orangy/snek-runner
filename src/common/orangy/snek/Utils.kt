@@ -44,7 +44,7 @@ fun dumpStatistics(games: Int, totalTime: Long, timings: List<Pair<Long, Simulat
     listOf(
             "${timings.map { it.first }.average().toLong() / 1000}us/g",
             "${timings.map { it.second.rounds }.average().toLong()}r/g",
-            "${timings.map { it.first / it.second.rounds }.average().toLong()/1000}us/r",
+            "${timings.map { it.first / it.second.rounds }.average().toLong() / 1000}us/r",
             "${sneksRounds}g/sn"
     ).joinToString(", ").also { println(it) }
 
