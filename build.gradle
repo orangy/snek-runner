@@ -24,13 +24,11 @@ repositories {
 kotlin {
     targets {
         fromPreset(presets.jvm, 'jvm') 
-/*
         fromPreset(presets.macosX64, 'macos') {
             compilations.main {
                 outputKinds = [EXECUTABLE]
             }
         }
-*/
     }
     sourceSets {
         commonMain {
@@ -58,11 +56,11 @@ kotlin {
             }
         }
         
-/*        macosMain {
+        macosMain {
             kotlin.srcDirs += "src/macos"
         }
         macosTest {
             kotlin.srcDirs += "test/macos"
-        }*/
+        }
     }
 }
